@@ -1,0 +1,28 @@
+{
+  "name": "grpc-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "pb:win:gen": "powershell -ExecutionPolicy unrestricted ./scripts/gen.ps1 greet",
+    "greet:server": "node greet/server/index.js",
+    "greet:client": "node greet/client/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michaelwestblade/grpc-node.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/michaelwestblade/grpc-node/issues"
+  },
+  "homepage": "https://github.com/michaelwestblade/grpc-node#readme",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.6.11",
+    "google-protobuf": "^3.21.0"
+  },
+  "devDependencies": {
+    "grpc-tools": "^1.11.2"
+  }
+}
