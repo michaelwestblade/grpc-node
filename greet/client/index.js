@@ -1,6 +1,7 @@
 const grpc = require('@grpc/grpc-js');
 const {GreetServiceClient} = require('../proto/greet_grpc_pb');
 const {GreetRequest} = require('../proto/greet_pb');
+const {greetWithDeadline} = require('../server/service_impl');
 
 function doGreet(client) {
   console.log('doGreet was invoked');
@@ -62,6 +63,22 @@ function doGreetEveryone(client) {
   call.end();
 }
 
+function doGreetWithDeadline(client, mils) {
+  console.log('doGreetWithDeadline was invoked');
+
+  const request = new GreetRequest().setFirstName('DeadlineDan');
+
+  client.greetWithDeadline(request, {
+    deadline: new Date(Date.now() + mils)
+  }, (err, res) => {
+    if(err) {
+      return console.error(err);
+    }
+
+    console.log(`GreetWithDeadline ${res.getResult()}`)
+  })
+}
+
 function main() {
   const creds = grpc.ChannelCredentials.createInsecure();
   const client = new GreetServiceClient('localhost:50051', creds);
@@ -70,6 +87,8 @@ function main() {
   doGreetManyTimes(client);
   doLongGreet(client);
   doGreetEveryone(client);
+  doGreetWithDeadline(client, 5000);
+  doGreetWithDeadline(client, 2000);
 
   client.close();
 }
