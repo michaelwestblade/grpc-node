@@ -1,6 +1,7 @@
 const {SumResponse} = require('../proto/sum_pb');
 const {PrimeResponse} = require('../proto/primes_pb');
 const {AvgResponse} = require('../proto/avg_pb');
+const {MaxResponse} = require('../proto/max_pb');
 const pb = require('../../greet/proto/greet_pb');
 
 exports.sum = (call, callback) => {
@@ -49,4 +50,23 @@ exports.avg = (call, callback) => {
 
     callback(null, res);
   })
+}
+
+exports.max = (call, _) => {
+  console.log('max was invoked');
+
+  let max = 0;
+
+  call.on('data', (req) => {
+    const number = req.getNumber();
+
+    if (number > max) {
+      const res = new MaxResponse().setResult(number);
+
+      call.write(res);
+      max = number;
+    }
+  });
+
+  call.on('end', () => call.end());
 }

@@ -5,6 +5,7 @@ var grpc = require('@grpc/grpc-js');
 var sum_pb = require('./sum_pb.js');
 var primes_pb = require('./primes_pb.js');
 var avg_pb = require('./avg_pb.js');
+var max_pb = require('./max_pb.js');
 
 function serialize_calculator_AvgRequest(arg) {
   if (!(arg instanceof avg_pb.AvgRequest)) {
@@ -26,6 +27,28 @@ function serialize_calculator_AvgResponse(arg) {
 
 function deserialize_calculator_AvgResponse(buffer_arg) {
   return avg_pb.AvgResponse.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_calculator_MaxRequest(arg) {
+  if (!(arg instanceof max_pb.MaxRequest)) {
+    throw new Error('Expected argument of type calculator.MaxRequest');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_calculator_MaxRequest(buffer_arg) {
+  return max_pb.MaxRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_calculator_MaxResponse(arg) {
+  if (!(arg instanceof max_pb.MaxResponse)) {
+    throw new Error('Expected argument of type calculator.MaxResponse');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_calculator_MaxResponse(buffer_arg) {
+  return max_pb.MaxResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
 function serialize_calculator_PrimeRequest(arg) {
@@ -106,6 +129,17 @@ var CalculatorServiceService = exports.CalculatorServiceService = {
     requestDeserialize: deserialize_calculator_AvgRequest,
     responseSerialize: serialize_calculator_AvgResponse,
     responseDeserialize: deserialize_calculator_AvgResponse,
+  },
+  max: {
+    path: '/calculator.CalculatorService/Max',
+    requestStream: true,
+    responseStream: true,
+    requestType: max_pb.MaxRequest,
+    responseType: max_pb.MaxResponse,
+    requestSerialize: serialize_calculator_MaxRequest,
+    requestDeserialize: deserialize_calculator_MaxRequest,
+    responseSerialize: serialize_calculator_MaxResponse,
+    responseDeserialize: deserialize_calculator_MaxResponse,
   },
 };
 
