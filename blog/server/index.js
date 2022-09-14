@@ -1,18 +1,26 @@
 const grpc = require('@grpc/grpc-js');
 const serviceImpl = require('./service_impl');
-const {BlogServiceService} = require('../proto/blog_grpc_pb')
+const {BlogServiceService} = require('../proto/blog_grpc_pb');
+const {MongoClient} = require('mongodb')
+const {aws4} = require('mongodb/src/deps');
 
 const addr = 'localhost:50051';
 
-function cleanup(server) {
+const uri = 'mongodb://root:root@localhost:27017/';
+const mongoClient = new MongoClient(uri);
+
+global.collection = undefined;
+
+async function cleanup(server) {
   console.log("Cleanup");
 
   if (server) {
+    await mongoClient.close();
     server.forceShutdown();
   }
 }
 
-function main() {
+async function main() {
   const server = new grpc.Server();
   const creds = grpc.ServerCredentials.createInsecure();
 
@@ -20,6 +28,11 @@ function main() {
     console.log('Caught interrupt signal');
     cleanup(server);
   })
+
+  await mongoClient.connect();
+
+  const database = mongoClient.db('blogdb');
+  collection = database.collection('blog');
 
   server.addService(BlogServiceService, serviceImpl);
   server.bindAsync(addr, creds, (error, _) => {
@@ -33,4 +46,4 @@ function main() {
   console.log(`Listening on ${addr}`);
 }
 
-main();
+main().catch((cleanup));

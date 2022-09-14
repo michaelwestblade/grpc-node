@@ -27,6 +27,7 @@
     "@grpc/proto-loader": "^0.7.2",
     "google-protobuf": "^3.21.0",
     "grpc": "^1.24.11",
+    "mongodb": "^4.9.1",
     "proto-loader": "^0.2.0"
   },
   "devDependencies": {
