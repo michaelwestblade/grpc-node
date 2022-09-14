@@ -2,7 +2,6 @@ const grpc = require('@grpc/grpc-js');
 const serviceImpl = require('./service_impl');
 const {BlogServiceService} = require('../proto/blog_grpc_pb');
 const {MongoClient} = require('mongodb')
-const {aws4} = require('mongodb/src/deps');
 
 const addr = 'localhost:50051';
 
