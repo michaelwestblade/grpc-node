@@ -37,7 +37,7 @@ function checkOID(id, callback) {
 }
 
 function checkNotFound(res, callback) {
-  if (!res || res.matchedCount == 0) {
+  if (!res || res.matchedCount == 0 || res.deletedCount == 0) {
     callback({
       code: grpc.status.NOT_FOUND,
       message: 'Could not find blog'

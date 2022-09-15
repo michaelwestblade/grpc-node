@@ -78,6 +78,24 @@ function listBlogs(client) {
   })
 }
 
+function deleteBlog(client, id) {
+  console.log('deleteBlog was invoked');
+
+  return new Promise((resolve, reject) => {
+    const req = new BlogId()
+      .setId(id)
+
+    client.deleteBlog(req, (err, _) => {
+      if (err) {
+        reject(err);
+      }
+
+      console.log(`Blog was deleted`);
+      resolve();
+    })
+  });
+}
+
 async function main() {
   const creds = grpc.ChannelCredentials.createInsecure();
   const client = new BlogServiceClient('localhost:50051', creds);
@@ -86,6 +104,7 @@ async function main() {
   await readBlog(client, id);
   await updateBlog(client, id);
   await listBlogs(client);
+  await deleteBlog(client, id);
 
   client.close();
 }
