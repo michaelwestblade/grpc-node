@@ -1,5 +1,7 @@
 const grpc = require('@grpc/grpc-js')
 const {Blog, BlogId} = require('../proto/blog_pb');
+const {ObjectID} = require('mongodb');
+const {Empty} = require('google-protobuf/google/protobuf/empty_pb');
 
 function blogToDocument(blog) {
   return {
@@ -23,6 +25,26 @@ function checkNotAcknowledged(res, callback) {
   }
 }
 
+function checkOID(id, callback) {
+  try {
+    return new ObjectID(id);
+  }catch (error) {
+    callback({
+      code: grpc.status.INTERNAL,
+      message: 'invalid OID'
+    })
+  }
+}
+
+function checkNotFound(res, callback) {
+  if (!res || res.matchedCount == 0) {
+    callback({
+      code: grpc.status.NOT_FOUND,
+      message: 'Could not find blog'
+    })
+  }
+}
+
 exports.createBlog = async (call, callback) => {
   const data = blogToDocument(call.request);
 
@@ -35,3 +57,45 @@ exports.createBlog = async (call, callback) => {
     callback(null, blogId);
   }).catch(err => internal(err, callback));
 }
+
+function documentToBlog(document) {
+  return new Blog()
+    .setId(document._id.toString())
+    .setAuthorId(document.author_id)
+    .setTitle(document.title)
+    .setContent(document.content);
+}
+
+exports.readBlog = async (call, callback) => {
+  const oid = checkOID(call.request.getId(), callback);
+
+  await collection.findOne({_id: oid}).then(res => {
+    checkNotFound(res, callback);
+    
+    callback(null, documentToBlog(res));
+  }).catch(error => internal(error, callback));
+}
+
+exports.updateBlog = async (call, callback) => {
+  const oid = checkOID(call.request.getId(), callback);
+
+  await collection.updateOne({_id: oid}, {$set: blogToDocument(call.request)}).then(res => {
+    checkNotFound(res, callback);
+    checkNotAcknowledged(res, callback);
+
+    callback(null, new Empty());
+  }).catch(error => internal(error, callback));
+}
+
+exports.deleteBlog = async (call, callback) => {
+  const oid = checkOID(call.request.getId(), callback);
+
+  await collection.find().then(res => {
+    checkNotFound(res, callback);
+    checkNotAcknowledged(res, callback);
+
+    callback(null, new Empty());
+  }).catch(error => internal(error, callback));
+}
+
+exports.listBlogs = async (call, callback) => {}
