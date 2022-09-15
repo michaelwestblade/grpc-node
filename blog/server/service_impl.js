@@ -90,7 +90,7 @@ exports.updateBlog = async (call, callback) => {
 exports.deleteBlog = async (call, callback) => {
   const oid = checkOID(call.request.getId(), callback);
 
-  await collection.find().then(res => {
+  await collection.deleteOne({_id: oid}).then(res => {
     checkNotFound(res, callback);
     checkNotAcknowledged(res, callback);
 
@@ -98,4 +98,13 @@ exports.deleteBlog = async (call, callback) => {
   }).catch(error => internal(error, callback));
 }
 
-exports.listBlogs = async (call, callback) => {}
+exports.listBlogs = async (call, callback) => {
+  await collection.find()
+    .map(doc => documentToBlog(doc))
+    .forEach(blog => call.write(blog))
+    .then(() => call.end())
+    .catch(err => call.destroy({
+      code: grpc.status.INTERNAL,
+      message: 'Could not list blogs'
+    }))
+}
